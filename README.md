@@ -1,9 +1,11 @@
 ## Install
 
+See this: https://github.com/aschmelyun/laravel-scheduled-tasks-docker
+
 ```
 git clone github.com/curder/laravel-docker-demo.git laravel-docker-demo
 
-cd laravel-docker-demo 
+cd laravel-docker-demo
 composer install -vvv
 cp .env.example .env
 ```
@@ -24,7 +26,7 @@ docker-compose up -d --build app
 - **PHP**   -:19000
 
 包括三个其他容器，它们可以处理Composer，NPM和Artisan命令，而不必在本地计算机上安装这些平台。从项目根目录使用以下命令示例，并对其进行修改以适合您的特定用例。
-                                  
+
 - `docker-compose run --rm composer update`
 - `docker-compose run --rm npm run dev`
 - `docker-compose run --rm artisan migrate`
