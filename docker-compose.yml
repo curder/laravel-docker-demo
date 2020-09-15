@@ -1,0 +1,101 @@
+version: '3'
+
+networks:
+  laravel:
+
+services:
+  app:
+    build:
+      context: ./docker
+      dockerfile: nginx.dockerfile
+    container_name: nginx
+    ports:
+    - "1080:80"
+    volumes:
+    - .:/var/www/codes:delegated
+    depends_on:
+      - php
+      - mysql
+    networks:
+      - laravel
+
+  mysql:
+    image: mysql:5.7.29
+    container_name: mysql
+    restart: unless-stopped
+    tty: true
+    # ports:
+    #   - "13306:3306"
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    # volumes:
+    # - ./docker/mysql/data:/var/lib/mysql
+    networks:
+      - laravel
+
+  php:
+    build:
+      context: ./docker
+      dockerfile: php.dockerfile
+    container_name: php
+    volumes:
+      - .:/var/www/codes:delegated
+    # ports:
+      # - "19000:9000"
+    networks:
+      - laravel
+
+  composer:
+    build:
+      context: ./docker
+      dockerfile: composer.dockerfile
+    container_name: composer
+    volumes:
+      - .:/var/www/codes:delegated
+    working_dir: /var/www/codes
+    depends_on:
+      - php
+    user: laravel
+    networks:
+      - laravel
+    entrypoint: ['composer', '--ignore-platform-reqs']
+
+  npm:
+    image: node:10.16.3
+    container_name: npm
+    volumes:
+      - .:/var/www/codes:delegated
+    working_dir: /var/www/codes
+    entrypoint: ['npm']
+
+  artisan:
+    build:
+      context: ./docker
+      dockerfile: php.dockerfile
+    container_name: artisan
+    volumes:
+      - .:/var/www/codes:delegated
+    depends_on:
+      - mysql
+    working_dir: /var/www/codes
+    user: laravel
+    entrypoint: ['php', '/var/www/codes/artisan']
+    networks:
+      - laravel
+
+  cron:
+    build:
+      context: ./docker
+      dockerfile: cron.dockerfile
+    container_name: crontab
+    volumes:
+      - .:/var/www/codes:delegated
+    networks:
+      - laravel
+
+
